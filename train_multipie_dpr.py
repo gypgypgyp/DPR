@@ -7,6 +7,7 @@ from torchvision import transforms
 from PIL import Image
 import numpy as np
 from model.defineHourglass_512_gray_skip import HourglassNet
+import datetime
 
 # ===============================
 # 1. Dataset Definition
@@ -144,7 +145,9 @@ def train_dpr(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_mode
 
         # Save checkpoint
         if (epoch + 1) % 5 == 0:
-            save_path = os.path.join(save_dir, f"trained_multipie_epoch{epoch+1}.pth")
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            save_path = os.path.join(save_dir, f"trained_multipie_epoch{epoch+1}_{timestamp}.pth")
+            # save_path = os.path.join(save_dir, f"trained_multipie_epoch{epoch+1}.pth")
             # save_path = os.path.join(save_dir, f"trained_multipie_epoch{epoch+1}.pth", flush=True)
             torch.save(model.state_dict(), save_path)
             print(f"✅ Model saved to {save_path}\n", flush=True)
