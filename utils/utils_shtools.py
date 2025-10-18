@@ -1,4 +1,8 @@
 # utils/utils_shtools.py
+# Name: Yunpei Gu (Team: Yunpei Gu)
+# Class: CS 7180 Advanced Perception
+# Date: 2025-10-15
+
 '''
     define some helper functions for shtools
 '''

@@ -1,4 +1,12 @@
 # model/defineHourglass_512_gray_skip.py
+# Name: Yunpei Gu (Team: Yunpei Gu)
+# Class: CS 7180 Advanced Perception
+# Date: 2025-10-15
+
+'''
+The core neural model that performs relighting given a target illumination.
+'''
+
 import torch
 from torch.autograd import Variable
 import torch.nn as nn

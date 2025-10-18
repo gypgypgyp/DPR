@@ -1,3 +1,8 @@
+# check_data_prepare.py
+# Name: Yunpei Gu (Team: Yunpei Gu)
+# Class: CS 7180 Advanced Perception
+# Date: 2025-10-15
+
 import numpy as np
 """
 check the results of prepare_multiplie

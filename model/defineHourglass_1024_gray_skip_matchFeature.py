@@ -1,4 +1,8 @@
 # model/defineHourglass_1024_gray_skip_matchFeature.py
+# Name: Yunpei Gu (Team: Yunpei Gu)
+# Class: CS 7180 Advanced Perception
+# Date: 2025-10-15
+
 import torch
 from torch.autograd import Variable
 import torch.nn as nn

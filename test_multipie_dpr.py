@@ -1,17 +1,23 @@
 # test_multipie_dpr.py
+# Name: Yunpei Gu (Team: Yunpei Gu)
+# Class: CS 7180 Advanced Perception
+# Date: 2025-10-15
+
 import os
 import torch
 from torchvision import transforms, utils
 from PIL import Image
 import numpy as np
+import matplotlib.pyplot as plt
 from model.defineHourglass_512_gray_skip import HourglassNet
 
 # ===============================
 # 1. Configuration
 # ===============================
 data_dir = "data/Multi_Pie/pairs"
-model_path = "trained_model/trained_multipie_epoch20.pth"
-output_dir = "output_results"
+model_path = "trained_model_20251017_2100_l1loss/trained_multipie_epoch100_20251018_063702.pth"
+
+output_dir = f"output_results_{model_path}"
 os.makedirs(output_dir, exist_ok=True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -1,4 +1,8 @@
 # utils/utils_normal.py
+# Name: Yunpei Gu (Team: Yunpei Gu)
+# Class: CS 7180 Advanced Perception
+# Date: 2025-10-15
+
 '''
     adjust normals according to which SH we want to use
 '''
