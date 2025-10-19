@@ -26,6 +26,10 @@ import time
 import json
 
 class MultiPiePairDataset(Dataset):
+    """
+    Dataset for Multi-PIE paired images with source and target lighting conditions.
+    Loads image pairs and their corresponding spherical harmonic lighting coefficients.
+    """
     def __init__(self, data_dir):
         self.data_dir = data_dir
         self.src_dir = os.path.join(data_dir, "source")
@@ -67,18 +71,32 @@ class MultiPiePairDataset(Dataset):
 
         return src_tensor, tgt_tensor, src_light, tgt_light
 
+# ===============================
+# 2. Train Function (without GAN)
+# ===============================
 def gradient_loss(pred, target):
+    """
+    Computes spatial gradient loss to preserve image structure.
+    Measures L1 difference between horizontal and vertical gradients.
+    """
     pred_dx = pred[:, :, :, 1:] - pred[:, :, :, :-1]
     pred_dy = pred[:, :, 1:, :] - pred[:, :, :-1, :]
     tgt_dx = target[:, :, :, 1:] - target[:, :, :, :-1]
     tgt_dy = target[:, :, 1:, :] - target[:, :, :-1, :]
     return torch.mean(torch.abs(pred_dx - tgt_dx)) + torch.mean(torch.abs(pred_dy - tgt_dy))
 
-
-# ===============================
-# 2. Train Function (without GAN)
-# ===============================
 def train_dpr(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_model"):
+    """
+    Trains the DPR model using L1, gradient, and feature losses (no adversarial loss).
+    
+    Args:
+        data_dir: Path to Multi-PIE paired dataset
+        epochs: Number of training epochs
+        batch_size: Batch size for training
+        lr: Learning rate
+        save_dir: Directory to save checkpoints and logs
+    """
+    # === Device Setup ===
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}", flush=True)
     if torch.cuda.is_available():
@@ -90,6 +108,8 @@ def train_dpr(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_mode
     else:
         print("⚠️ No GPU available, using CPU", flush=True)
     print(f"{'-'*50}\n", flush=True)
+
+    # === Training Setup ===
     # Record start time
     start_time = time.time()
     torch.backends.cudnn.benchmark = False
@@ -98,6 +118,7 @@ def train_dpr(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_mode
     # store loss history
     loss_history = []
 
+    # === Data Loading ===
     # Dataset and Loader
     print("✅ Step 1: Creating dataset...", flush=True)
     dataset = MultiPiePairDataset(data_dir)
@@ -108,14 +129,14 @@ def train_dpr(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_mode
     
     print("✅ Step 3: DataLoader ready!", flush=True)
 
+    # === Model Initialization ===
     # Model
     model = HourglassNet(baseFilter=16, gray=True).to(device)
     criterion = nn.L1Loss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
-
     os.makedirs(save_dir, exist_ok=True)
 
-
+    # === Sanity Check ===
     src, tgt, src_light, tgt_light = next(iter(dataloader))
     print(f"✅ Loaded one batch: src={src.shape}, tgt={tgt.shape}", flush=True)
     with torch.no_grad():
@@ -123,12 +144,13 @@ def train_dpr(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_mode
         print(f"✅ Forward check ok: pred={pred.shape}", flush=True)
     print("✅ Step 6: Passed sanity check, starting training...\n", flush=True)
 
-
+    # === Training Loop ===
     for epoch in range(epochs):
         model.train()
         total_loss = 0.0
         skip_count = max(0, min(epoch - 5, 4))
         λ = 0.5  # weight for feature loss
+
         # for src, tgt, src_light, tgt_light in dataloader:
         for i, (src, tgt, src_light, tgt_light) in enumerate(dataloader):
             src, tgt = src.to(device), tgt.to(device)
@@ -137,11 +159,7 @@ def train_dpr(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_mode
             # optimizer
             optimizer.zero_grad()
 
-            # Forwarding (non-skip)
-            # pred, _ = model(src, tgt_light, skip_count=0)
-
             # Forwarding (skip)
-            # skip_count = max(0, min(epoch - 5, 4))
             # pred, _ = model(src, tgt_light, skip_count=skip_count)
 
             # # Forward (skip, featureloss) : relight from source → target lighting ; self-lighting (same light)
@@ -162,6 +180,7 @@ def train_dpr(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_mode
             grad_loss = gradient_loss(pred, tgt)
             feature_loss = torch.mean(torch.abs(zf_tgt - zf_src))
             loss = l1_loss + 0.1 * grad_loss + λ * feature_loss
+
 
             # Backwarding
             loss.backward()
