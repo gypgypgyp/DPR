@@ -235,6 +235,18 @@ def train_dpr(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_mode
 # 3. Train Function (with GAN)
 # ===============================
 def train_dpr_gan(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_model"):
+    """
+    Trains the DPR model with adversarial loss using PatchGAN discriminator.
+    Combines L1, gradient, feature, and GAN losses for improved realism.
+    
+    Args:
+        data_dir: Path to Multi-PIE paired dataset
+        epochs: Number of training epochs
+        batch_size: Batch size for training
+        lr: Learning rate for both generator and discriminator
+        save_dir: Directory to save checkpoints and logs
+    """
+    # === Device Setup ===
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}", flush=True)
     if torch.cuda.is_available():
@@ -266,6 +278,10 @@ def train_dpr_gan(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_
 
     # PatchGAN discriminator
     class PatchDiscriminator(nn.Module):
+        """
+        PatchGAN discriminator that classifies image patches as real/fake.
+        Uses strided convolutions with instance normalization.
+        """
         def __init__(self, in_channels=1):
             super(PatchDiscriminator, self).__init__()
             self.model = nn.Sequential(
@@ -308,9 +324,7 @@ def train_dpr_gan(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_
             src, tgt = src.to(device), tgt.to(device)
             src_light, tgt_light = src_light.to(device), tgt_light.to(device)
 
-            # ============================================
-            # 1️⃣ Train Discriminator (LSGAN)
-            # ============================================
+            #  === Train Discriminator  === 
             with torch.no_grad():
                 fake_pred, _ = model(src, tgt_light, skip_count=skip_count)
             real_out = D(tgt)
@@ -324,9 +338,7 @@ def train_dpr_gan(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_
             loss_D.backward()
             optimizer_D.step()
 
-            # ============================================
-            # 2️⃣ Train Generator (HourglassNet)
-            # ============================================
+            #  === Train Generator (HourglassNet) === 
             pred, zf_tgt = model(src, tgt_light, skip_count=skip_count)
             _, zf_src = model(src, src_light, skip_count=skip_count)
 
