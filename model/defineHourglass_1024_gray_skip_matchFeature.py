@@ -3,6 +3,11 @@
 # Class: CS 7180 Advanced Perception
 # Date: 2025-10-15
 
+
+'''
+The model that performs relighting given a target illumination on 1024 images. Used as reference for the model on 512 images. 
+'''
+
 import torch
 from torch.autograd import Variable
 import torch.nn as nn

@@ -4,7 +4,7 @@
 # Date: 2025-10-15
 
 '''
-The core neural model that performs relighting given a target illumination.
+The core neural model that performs relighting given a target illumination on 512 images.
 '''
 
 import torch
@@ -53,9 +53,9 @@ class BasicBlock(nn.Module):
         out = self.bn2(out)
         
         if self.inplanes != self.outplanes:
-        		out += self.shortcuts(x)
+        	out += self.shortcuts(x)
         else:
-        		out += x
+        	out += x
         
         out = F.relu(out)
         return out
@@ -90,7 +90,10 @@ class HourglassBlock(nn.Module):
         out_upper = self.upper(x)
         out_lower = self.downSample(x)
         out_lower = self.low1(out_lower)
-        out_lower, out_middle = self.middle(out_lower, light, count+1, skip_count)
+
+        # === Add feature to output ===
+        out_lower, out_feat, out_middle = self.middle(out_lower, light, count+1, skip_count)
+
         out_lower = self.low2(out_lower)
         out_lower = self.upSample(out_lower)
 
@@ -101,7 +104,7 @@ class HourglassBlock(nn.Module):
         else:
             out = out_lower
             #out = out_upper
-        return out, out_middle
+        return out, out_feat, out_middle
 
 class lightingNet(nn.Module):
     '''
@@ -144,7 +147,7 @@ class lightingNet(nn.Module):
         innerFeat_new[:, 0:self.ncInput, :, :] = upFeat
 
         # return innerFeat, light
-        return innerFeat_new, light
+        return innerFeat_new, innerFeat[:, self.ncInput:, :, :], light
 
 
 class HourglassNet(nn.Module):
@@ -195,13 +198,13 @@ class HourglassNet(nn.Module):
         feat = self.pre_conv(x)
         feat = F.relu(self.pre_bn(feat))
         # get the inner most features
-        feat, out_light = self.HG3(feat, target_light, 0, skip_count)
+        feat, out_feat, out_light = self.HG3(feat, target_light, 0, skip_count)
         feat = F.relu(self.bn_1(self.conv_1(feat)))
         feat = F.relu(self.bn_2(self.conv_2(feat)))
         feat = F.relu(self.bn_3(self.conv_3(feat)))
         out_img = self.output(feat)
         out_img = torch.sigmoid(out_img)
-        return out_img, out_light
+        return out_img, out_feat, out_light
 
 if __name__ == '__main__':
     pass
