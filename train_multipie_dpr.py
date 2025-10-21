@@ -600,21 +600,30 @@ if __name__ == "__main__":
     data_dir = "data/Multi_Pie/pairs"
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
+    # save_dir = f"trained_model/{timestamp}_L1_skip"
     # print("-----train with L1-----")
+    # print(f"-----save der: {save_dir}-----")
     # train_dpr(data_dir, epochs=100, batch_size=2, lr=1e-4,
-    #         save_dir=f"trained_model/{timestamp}_L1_skip",
+    #         save_dir=save_dir,
     #         loss_mode="L1") #2386015
     
+    # save_dir = f"trained_model/{timestamp}_L1Grad_skip"
     # print("-----train with L1, gradient-----")
+    # print(f"-----save der: {save_dir}-----")
     # train_dpr(data_dir, epochs=100, batch_size=2, lr=1e-4,
-    #           save_dir=f"trained_model/{timestamp}_L1Grad_skip", 
-    #           loss_mode="L1+Grad") #2386027
+    #           save_dir=save_dir, 
+    #           loss_mode="L1+Grad") #2386027, 2394598
 
+    
+    # save_dir = f"trained_model/{timestamp}_L1GradFeat_skip"
     # print("-----train with L1, gradient, feature-----")
+    # print(f"-----save der: {save_dir}-----")
     # train_dpr(data_dir, epochs=100, batch_size=2, lr=1e-4,
-    #         save_dir=f"trained_model/{timestamp}_L1GradFeat_skip",
+    #         save_dir=save_dir,
     #         loss_mode="L1+Grad+Feat") #2386035
 
+    save_dir = f"trained_model/{timestamp}_L1GradientFeatureGAN_skip"
     print("-----train with L1, gradient, feature, GAN-----")
+    print(f"-----save der: {save_dir}-----")
     train_dpr_gan(data_dir=data_dir, epochs=100, batch_size=2, lr=1e-4, 
-            save_dir=f"trained_model/{timestamp}_L1GradientFeatureGAN_skip") #2386036
+            save_dir=save_dir) #2386036
