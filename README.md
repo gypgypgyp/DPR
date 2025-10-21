@@ -4,7 +4,7 @@ Deep Single-Image Portrait Relighting
 Name: Yunpei Gu (Team: Yunpei Gu)
 Class: CS 7180 Advanced Perception
 Date: 2025-10-15
-Time Travel Days: I would like to use 2 time travel days.
+Time Travel Days: I would like to use 4 travel days.
 
 ## Operating System
 Rocky Linux 9.3 (x86_64) — NEU Explorer HPC Cluster

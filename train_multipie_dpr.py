@@ -111,7 +111,7 @@ def compute_si_mse(pred, target):
 
     # compute SI-MSE
     mse = ((target - alpha * pred) ** 2).mean(dim=[1,2,3])
-    return mse.mean().item()
+    return mse.sum().item()
 
 
 def compute_si_l2(pred_light, gt_light):
@@ -282,29 +282,6 @@ def train_dpr(
     np.save(os.path.join(save_dir, "val_si_mse.npy"), np.array(val_si_mse_list))
     np.save(os.path.join(save_dir, "val_si_l2.npy"),  np.array(val_si_l2_list))  
 
-    # plt.figure(figsize=(6,4))
-    # plt.plot(range(1, len(loss_history)+1), loss_history, label="Train Loss", marker='o')
-    # plt.plot(range(1, len(val_si_mse_list)+1), val_si_mse_list, label="Val SI-MSE", marker='s')
-    # plt.plot(range(1, len(val_si_l2_list)+1),  val_si_l2_list,  label="Val SI-L2",  marker='^')   
-    # plt.xlabel("Epoch")
-    # plt.ylabel("Loss / Metric")
-    # plt.title("Training vs Validation (without GAN)")
-    # plt.legend()
-    # plt.grid(True, linestyle="--", alpha=0.6)
-    # plt.tight_layout()
-    # plt.savefig(os.path.join(save_dir, "train_val_curve.png"))
-    # plt.close()
-    # print("📊 Saved training-validation curve with SI-MSE & SI-L2")
-
-
-    # end_time = time.time()
-    # total_seconds = int(end_time - start_time)
-    # hrs = total_seconds // 3600
-    # mins = (total_seconds % 3600) // 60
-    # secs = total_seconds % 60
-    # print(f"⏱️ Total training time: {hrs}h {mins}m {secs}s")
-    # print(f"✅ Final average generator loss after {epochs} epochs: {loss_history[-1]:.6f}")
-
     epochs_range = range(1, len(loss_history) + 1)
 
     # -----------------------------
@@ -321,21 +298,39 @@ def train_dpr(
     plt.close()
     print("📊 Saved training loss curve -> train_loss_curve.png")
 
-    # -----------------------------
-    # SI-MSE & SI-L2
-    # -----------------------------
+
+    # === Plot Validation SI-MSE ===
     plt.figure(figsize=(6, 4))
-    plt.plot(epochs_range, val_si_mse_list, marker='s', label="Val SI-MSE", color='tab:orange')
-    plt.plot(epochs_range, val_si_l2_list, marker='^', label="Val SI-L2", color='tab:green')
+    plt.plot(epochs_range, val_si_mse_list, marker='s', color='tab:orange', linewidth=1.8)
     plt.xlabel("Epoch")
-    plt.ylabel("Validation Metric")
-    plt.title("Validation Curves (SI-MSE & SI-L2)")
-    plt.legend()
+    plt.ylabel("SI-MSE")
+    plt.title("Validation Curve (SI-MSE)")
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, "val_metrics_curve.png"))
+    plt.savefig(os.path.join(save_dir, "val_si_mse_curve.png"))
     plt.close()
-    print("📊 Saved validation metrics curve -> val_metrics_curve.png")
+    print("📊 Saved validation SI-MSE curve -> val_si_mse_curve.png")
+
+    # === Plot Validation SI-L2 ===
+    plt.figure(figsize=(6, 4))
+    plt.plot(epochs_range, val_si_l2_list, marker='^', color='tab:green', linewidth=1.8)
+    plt.xlabel("Epoch")
+    plt.ylabel("SI-L2")
+    plt.title("Validation Curve (SI-L2)")
+    plt.grid(True, linestyle="--", alpha=0.6)
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, "val_si_l2_curve.png"))
+    plt.close()
+    print("📊 Saved validation SI-L2 curve -> val_si_l2_curve.png")
+
+
+    end_time = time.time()
+    total_seconds = int(end_time - start_time)
+    hrs = total_seconds // 3600
+    mins = (total_seconds % 3600) // 60
+    secs = total_seconds % 60
+    print(f"⏱️ Total training time: {hrs}h {mins}m {secs}s")
+    print(f"✅ Final average generator loss after {epochs} epochs: {loss_history[-1]:.6f}")
 
 # ===============================
 # Train Function (with GAN)
@@ -552,7 +547,7 @@ def train_dpr_gan(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_
     epochs_range = range(1, len(loss_history) + 1)
 
     # -----------------------------
-    # 图1：训练损失曲线（Train Loss）
+    # Train Loss
     # -----------------------------
     plt.figure(figsize=(6, 4))
     plt.plot(epochs_range, loss_history, marker='o', label="Train Loss", color='tab:blue')
@@ -565,22 +560,29 @@ def train_dpr_gan(data_dir, epochs=20, batch_size=2, lr=1e-4, save_dir="trained_
     plt.close()
     print("📊 Saved training loss curve -> train_loss_curve.png")
 
-    # -----------------------------
-    # 图2：验证指标曲线（SI-MSE & SI-L2）
-    # -----------------------------
+    # === Plot Validation SI-MSE ===
     plt.figure(figsize=(6, 4))
-    plt.plot(epochs_range, val_si_mse_list, marker='s', label="Val SI-MSE", color='tab:orange')
-    plt.plot(epochs_range, val_si_l2_list, marker='^', label="Val SI-L2", color='tab:green')
+    plt.plot(epochs_range, val_si_mse_list, marker='s', color='tab:orange', linewidth=1.8)
     plt.xlabel("Epoch")
-    plt.ylabel("Validation Metric")
-    plt.title("Validation Curves (SI-MSE & SI-L2)")
-    plt.legend()
+    plt.ylabel("SI-MSE")
+    plt.title("Validation Curve (SI-MSE)")
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, "val_metrics_curve.png"))
+    plt.savefig(os.path.join(save_dir, "val_si_mse_curve.png"))
     plt.close()
-    print("📊 Saved validation metrics curve -> val_metrics_curve.png")
+    print("📊 Saved validation SI-MSE curve -> val_si_mse_curve.png")
 
+    # === Plot Validation SI-L2 ===
+    plt.figure(figsize=(6, 4))
+    plt.plot(epochs_range, val_si_l2_list, marker='^', color='tab:green', linewidth=1.8)
+    plt.xlabel("Epoch")
+    plt.ylabel("SI-L2")
+    plt.title("Validation Curve (SI-L2)")
+    plt.grid(True, linestyle="--", alpha=0.6)
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, "val_si_l2_curve.png"))
+    plt.close()
+    print("📊 Saved validation SI-L2 curve -> val_si_l2_curve.png")
 
 
     end_time = time.time()
@@ -598,14 +600,21 @@ if __name__ == "__main__":
     data_dir = "data/Multi_Pie/pairs"
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
+    # print("-----train with L1-----")
     # train_dpr(data_dir, epochs=100, batch_size=2, lr=1e-4,
     #         save_dir=f"trained_model/{timestamp}_L1_skip",
-    #         loss_mode="L1")
+    #         loss_mode="L1") #2386015
+    
+    # print("-----train with L1, gradient-----")
     # train_dpr(data_dir, epochs=100, batch_size=2, lr=1e-4,
-    #           save_dir=f"trained_model/{timestamp}_L1Grad_skip",
-    #           loss_mode="L1+Grad")
+    #           save_dir=f"trained_model/{timestamp}_L1Grad_skip", 
+    #           loss_mode="L1+Grad") #2386027
+
+    # print("-----train with L1, gradient, feature-----")
     # train_dpr(data_dir, epochs=100, batch_size=2, lr=1e-4,
     #         save_dir=f"trained_model/{timestamp}_L1GradFeat_skip",
-    #         loss_mode="L1+Grad+Feat")
+    #         loss_mode="L1+Grad+Feat") #2386035
+
+    print("-----train with L1, gradient, feature, GAN-----")
     train_dpr_gan(data_dir=data_dir, epochs=100, batch_size=2, lr=1e-4, 
-            save_dir=f"trained_model/{timestamp}_L1GradientFeatureGAN_skip")
+            save_dir=f"trained_model/{timestamp}_L1GradientFeatureGAN_skip") #2386036
